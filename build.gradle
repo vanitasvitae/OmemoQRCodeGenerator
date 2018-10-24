@@ -1,0 +1,55 @@
+group 'de.vanitasvitae'
+version '1.0-SNAPSHOT'
+
+buildscript {
+
+    dependencies {
+        // Material Design
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'javafx-gradle-plugin'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://igniterealtime.org/repo/"
+    }
+}
+
+ext {
+    smackVersion="4.4.0-alpha2-SNAPSHOT"
+}
+
+dependencies {
+    compileClasspath 'de.dynamicfiles.projects.gradle.plugins:javafx-gradle-plugin:8.8.2'
+    implementation 'com.jfoenix:jfoenix:8.0.7'
+    implementation 'com.google.zxing:core:3.3.3'
+
+    implementation "org.igniterealtime.smack:smack-java7:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-resolver-dnsjava:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-tcp:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-extensions:$smackVersion"
+
+    implementation "org.igniterealtime.smack:smack-omemo-signal:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-omemo:$smackVersion"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jfx {
+    mainClass = 'de.vanitasvitae.omemoqrgenerator.Main'
+
+    vendor = 'vanitasvitae'
+}
