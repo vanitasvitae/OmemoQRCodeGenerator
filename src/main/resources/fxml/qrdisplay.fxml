@@ -2,14 +2,9 @@
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
-<?import com.jfoenix.controls.JFXTextArea?>
-<?import javafx.scene.layout.HBox?>
 <VBox alignment="TOP_CENTER" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.162-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.vanitasvitae.omemoqrgenerator.QrDisplayController">
     <children>
         <ImageView fx:id="qr_view"/>
-        <HBox>
-            <JFXTextArea fx:id="content_text" />
-        </HBox>
-
+        <fx:include fx:id="listView" source="listview.fxml"/>
     </children>
 </VBox>

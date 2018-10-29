@@ -1,28 +1,34 @@
 package de.vanitasvitae.omemoqrgenerator;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Map;
 
 import org.jivesoftware.smack.SmackConfiguration;
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-import org.jivesoftware.smackx.disco.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.omemo.internal.OmemoDevice;
 import org.jivesoftware.smackx.omemo.trust.OmemoFingerprint;
-import org.jivesoftware.smackx.pubsub.PubSubManager;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jxmpp.jid.BareJid;
+import org.jxmpp.stringprep.XmppStringprepException;
 
 public class Main extends Application implements LoginCallback {
 
     private Stage stage;
 
-
+    /*
+     * Trim down Smack.
+     */
     static {
         SmackConfiguration.DEBUG = true;
         SmackConfiguration.addDisabledSmackClasses("org.jivesoftware.smack.ReconnectionManager",
@@ -58,13 +64,18 @@ public class Main extends Application implements LoginCallback {
                 "org.jivesoftware.smackx.iqlast",
                 "org.jivesoftware.smackx.receipts",
                 "org.jivesoftware.smackx.iqversion"
-                );
+        );
     }
 
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Render the login screen.
+     * @param stage stage
+     * @throws Exception in case something goes wrong.
+     */
     @Override
     public void start(Stage stage) throws Exception {
         this.stage = stage;
@@ -73,6 +84,8 @@ public class Main extends Application implements LoginCallback {
         Parent root = loader.load();
         stage.setMinHeight(600);
         stage.setMinWidth(400);
+
+        // Register ourselves as callback for the login button.
         LoginController loginController = loader.getController();
         loginController.setLoginCallback(this);
 
@@ -84,12 +97,22 @@ public class Main extends Application implements LoginCallback {
 
     @Override
     public void login(String username, String password) {
+        XMPPTCPConnection connection = null;
         try {
-            XMPPTCPConnection connection = new XMPPTCPConnection(username, password);
+            connection = new XMPPTCPConnection(username, password);
             connection.connect().login();
+
+            if (connection == null) {
+                return;
+            }
 
             BareJid jid = connection.getUser().asBareJid();
             Map<OmemoDevice, OmemoFingerprint> fingerprints = Util.getFingerprints(connection);
+
+            ObservableList<OmemoIdentity> identities = FXCollections.observableArrayList();
+            for (OmemoDevice device : fingerprints.keySet()) {
+                identities.addAll(new OmemoIdentity(device, fingerprints.get(device)));
+            }
 
             connection.disconnect(new Presence(Presence.Type.unavailable));
 
@@ -97,19 +120,14 @@ public class Main extends Application implements LoginCallback {
             loader.setLocation(getClass().getResource("/fxml/qrdisplay.fxml"));
             Parent root = loader.load();
             QrDisplayController controller = loader.getController();
-            controller.setFingerprints(jid, fingerprints);
+            controller.setFingerprints(jid, identities);
 
             Scene scene = new Scene(root, 400, 600);
             stage.setTitle("OMEMO QR-Code Generator");
             stage.setScene(scene);
             stage.show();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
-
-
 }

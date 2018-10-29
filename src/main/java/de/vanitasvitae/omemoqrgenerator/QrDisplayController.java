@@ -2,8 +2,10 @@ package de.vanitasvitae.omemoqrgenerator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.jivesoftware.smackx.omemo.internal.OmemoDevice;
 import org.jivesoftware.smackx.omemo.trust.OmemoFingerprint;
@@ -12,10 +14,11 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import com.jfoenix.controls.JFXTextArea;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import org.jxmpp.jid.BareJid;
 
 public class QrDisplayController {
@@ -24,35 +27,44 @@ public class QrDisplayController {
     private ImageView qr_view;
 
     @FXML
-    private JFXTextArea content_text;
+    private GridPane listView;
+
+    @FXML
+    private ListViewController listViewController;
 
     private BareJid jid;
-    private Map<OmemoDevice, OmemoFingerprint> fingerprintMap;
+    private ObservableList<OmemoIdentity> identities = null;
 
-    public void setFingerprints(BareJid jid, Map<OmemoDevice, OmemoFingerprint> fingerprints) {
+    public void setFingerprints(BareJid jid, ObservableList<OmemoIdentity> identities) {
         this.jid = jid;
-        this.fingerprintMap = fingerprints;
-        drawQRCode(jid, fingerprints);
+        this.identities = identities;
+        this.listViewController.setDisplayController(this);
+        this.listViewController.setIdentities(this.identities);
+        drawQRCode();
     }
 
-    public void drawQRCode(BareJid jid, Map<OmemoDevice, OmemoFingerprint> fingerprints) {
+    public void drawQRCode() {
         int width = 300, height = 300;
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
 
         String content = "xmpp:" + jid.toString();
 
-        Iterator<OmemoDevice> iterator = fingerprints.keySet().iterator();
-        if (iterator.hasNext()) {
-            OmemoDevice first = iterator.next();
-            content += "?omemo-sid-" + first.getDeviceId() + "=" + fingerprints.get(first);
+        Iterator<OmemoIdentity> iterator = identities.iterator();
+
+        while (iterator.hasNext()) {
+            OmemoIdentity first = iterator.next();
+            if (first.getEnabled()) {
+                content += "?omemo-sid-" + first.getDevice().getDeviceId() + "=" + first.getFingerprint().toString();
+                break;
+            }
         }
 
         while (iterator.hasNext()) {
-            OmemoDevice next = iterator.next();
-            content += ";omemo-sid-" + next.getDeviceId() + "=" + fingerprints.get(next);
+            OmemoIdentity next = iterator.next();
+            if (next.getEnabled()) {
+                content += ";omemo-sid-" + next.getDevice().getDeviceId() + "=" + next.getFingerprint().toString();
+            }
         }
-
-        content_text.setText(content);
 
         BufferedImage image;
 
