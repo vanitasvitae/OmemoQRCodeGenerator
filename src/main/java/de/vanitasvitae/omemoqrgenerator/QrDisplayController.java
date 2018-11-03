@@ -2,24 +2,19 @@ package de.vanitasvitae.omemoqrgenerator;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import org.jivesoftware.smackx.omemo.internal.OmemoDevice;
-import org.jivesoftware.smackx.omemo.trust.OmemoFingerprint;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import javafx.collections.ObservableList;
+import com.jfoenix.controls.JFXListView;
+import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import org.jxmpp.jid.BareJid;
 
 public class QrDisplayController {
 
@@ -27,29 +22,29 @@ public class QrDisplayController {
     private ImageView qr_view;
 
     @FXML
-    private GridPane listView;
+    private ListView listView;
 
     @FXML
     private ListViewController listViewController;
 
-    private BareJid jid;
-    private ObservableList<OmemoIdentity> identities = null;
+    private Repository repository = Repository.getInstance();
 
-    public void setFingerprints(BareJid jid, ObservableList<OmemoIdentity> identities) {
-        this.jid = jid;
-        this.identities = identities;
-        this.listViewController.setDisplayController(this);
-        this.listViewController.setIdentities(this.identities);
+    @FXML
+    public void initialize() {
         drawQRCode();
+        repository.getIdentities().addListener((ListChangeListener<OmemoIdentity>) change -> drawQRCode());
     }
 
     public void drawQRCode() {
-        int width = 300, height = 300;
+        System.out.println("Draw!");
+        Repository repository = Repository.getInstance();
+
+        int width = 360, height = 360;
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
 
-        String content = "xmpp:" + jid.toString();
+        String content = "xmpp:" + repository.getJid().toString();
 
-        Iterator<OmemoIdentity> iterator = identities.iterator();
+        Iterator<OmemoIdentity> iterator = repository.getIdentities().iterator();
 
         while (iterator.hasNext()) {
             OmemoIdentity first = iterator.next();

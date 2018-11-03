@@ -20,6 +20,7 @@ import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubException;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 
+import org.bouncycastle.util.Strings;
 import org.jxmpp.jid.BareJid;
 
 public class Util {
@@ -93,5 +94,12 @@ public class Util {
         }
 
         return items.get(items.size() - 1).getPayload();
+    }
+
+    public static String twoLinesFingerprint(OmemoFingerprint fingerprint) {
+        String blocks = fingerprint.blocksOf8Chars();
+        String out = blocks.substring(0, 35);
+        out = out + "\n" + blocks.substring(36);
+        return out;
     }
 }

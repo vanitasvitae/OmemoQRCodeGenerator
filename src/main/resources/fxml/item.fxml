@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.HBox?>
 <?import com.jfoenix.controls.JFXToggleButton?>
-<HBox xmlns:fx="http://javafx.com/fxml" fx:id="hBox">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox fx:id="hBox" xmlns="http://javafx.com/javafx/8.0.162-ea" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <Label fx:id="id"/>
-        <Label fx:id="fingerprint"/>
-        <JFXToggleButton fx:id="toggle" />
+      <AnchorPane prefHeight="67.0" prefWidth="300.0" maxWidth="350">
+         <children>
+              <Label fx:id="id" alignment="BASELINE_RIGHT" text="1429677125" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
+               <padding>
+                  <Insets bottom="5.0" right="5.0" />
+               </padding>
+            </Label>
+            <Label fx:id="fingerprint" layoutX="100.0" prefHeight="44.0" prefWidth="288.0" AnchorPane.bottomAnchor="23.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+               <font>
+                  <Font name="Bitstream Vera Sans Mono" size="13.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+        <JFXToggleButton fx:id="toggle" alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY" selected="true" text="ToggleButton" />
     </children>
 </HBox>

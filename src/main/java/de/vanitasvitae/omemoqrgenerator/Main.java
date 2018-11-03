@@ -1,11 +1,8 @@
 package de.vanitasvitae.omemoqrgenerator;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.jivesoftware.smack.SmackConfiguration;
-import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smackx.omemo.internal.OmemoDevice;
@@ -14,13 +11,11 @@ import org.jivesoftware.smackx.omemo.trust.OmemoFingerprint;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jxmpp.jid.BareJid;
-import org.jxmpp.stringprep.XmppStringprepException;
 
 public class Main extends Application implements LoginCallback {
 
@@ -83,7 +78,9 @@ public class Main extends Application implements LoginCallback {
         loader.setLocation(getClass().getResource("/fxml/login.fxml"));
         Parent root = loader.load();
         stage.setMinHeight(600);
+        stage.setMaxHeight(600);
         stage.setMinWidth(400);
+        stage.setMaxWidth(400);
 
         // Register ourselves as callback for the login button.
         LoginController loginController = loader.getController();
@@ -97,21 +94,19 @@ public class Main extends Application implements LoginCallback {
 
     @Override
     public void login(String username, String password) {
-        XMPPTCPConnection connection = null;
+        Repository repository = Repository.getInstance();
+        XMPPTCPConnection connection;
         try {
             connection = new XMPPTCPConnection(username, password);
             connection.connect().login();
 
-            if (connection == null) {
-                return;
-            }
-
-            BareJid jid = connection.getUser().asBareJid();
+            repository.setJid(connection.getUser().asBareJid());
             Map<OmemoDevice, OmemoFingerprint> fingerprints = Util.getFingerprints(connection);
 
-            ObservableList<OmemoIdentity> identities = FXCollections.observableArrayList();
+            ObservableList<OmemoIdentity> identities = repository.getIdentities();
             for (OmemoDevice device : fingerprints.keySet()) {
                 identities.addAll(new OmemoIdentity(device, fingerprints.get(device)));
+                System.out.println(Util.twoLinesFingerprint(fingerprints.get(device)));
             }
 
             connection.disconnect(new Presence(Presence.Type.unavailable));
@@ -119,8 +114,6 @@ public class Main extends Application implements LoginCallback {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/fxml/qrdisplay.fxml"));
             Parent root = loader.load();
-            QrDisplayController controller = loader.getController();
-            controller.setFingerprints(jid, identities);
 
             Scene scene = new Scene(root, 400, 600);
             stage.setTitle("OMEMO QR-Code Generator");

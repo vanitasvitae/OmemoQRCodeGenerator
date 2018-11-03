@@ -23,8 +23,6 @@ public class ListViewCell extends JFXListCell<OmemoIdentity> {
     @FXML
     private JFXToggleButton toggle;
 
-    private QrDisplayController displayController = null;
-
     public ListViewCell() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/item.fxml"));
         fxmlLoader.setController(this);
@@ -38,27 +36,21 @@ public class ListViewCell extends JFXListCell<OmemoIdentity> {
         }
     }
 
-    public void setDisplayController(QrDisplayController controller)  {
-        this.displayController = controller;
-    }
-
     @Override
     public void updateItem(OmemoIdentity identity, boolean empty) {
+        Repository repository = Repository.getInstance();
         if (empty) {
             return;
         }
 
-        if (id != null) id.setText(Integer.toString(identity.getDevice().getDeviceId()));
-        if (fingerprint != null) fingerprint.setText(identity.getFingerprint().blocksOf8Chars());
-        if (toggle != null) toggle.setSelected(identity.getEnabled());
-        if (hBox != null) setGraphic(hBox);
-        if (toggle != null) {
-            toggle.setOnAction(actionEvent -> {
-                identity.setEnabled(toggle.isSelected());
-                if (displayController != null) {
-                    displayController.drawQRCode();
-                }
-            });
-        }
+        id.setText(Integer.toString(identity.getDevice().getDeviceId()));
+        fingerprint.setText(Util.twoLinesFingerprint(identity.getFingerprint()));
+        toggle.setSelected(identity.getEnabled());
+        setGraphic(hBox);
+
+        toggle.setOnAction(actionEvent -> {
+            identity.setEnabled(toggle.isSelected());
+            repository.getIdentities().add(repository.getIdentities().remove(repository.getIdentities().size() -1));
+        });
     }
 }
