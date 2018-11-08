@@ -5,4 +5,10 @@
 */out
 */build/
 
+
 out/
+
+/.classpath
+/.project
+/.settings/
+/bin/
