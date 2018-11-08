@@ -1,6 +1,5 @@
 package de.vanitasvitae.omemoqrgenerator;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.input.ScrollEvent;
