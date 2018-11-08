@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jivesoftware.smack.SmackConfiguration;
-import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smackx.omemo.internal.OmemoDevice;
 import org.jivesoftware.smackx.omemo.trust.OmemoFingerprint;
@@ -114,7 +113,7 @@ public class Main extends Application implements LoginCallback {
                 LOGGER.info(Util.twoLinesFingerprint(fingerprints.get(device)));
             }
 
-            connection.disconnect(new Presence(Presence.Type.unavailable));
+            connection.disconnect();
 
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/fxml/qrdisplay.fxml"));
