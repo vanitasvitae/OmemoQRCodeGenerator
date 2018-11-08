@@ -1,23 +1,28 @@
 package de.vanitasvitae.omemoqrgenerator;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jivesoftware.smack.SmackConfiguration;
-import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
+import org.jivesoftware.smackx.omemo.exceptions.CorruptedOmemoKeyException;
 import org.jivesoftware.smackx.omemo.internal.OmemoDevice;
 import org.jivesoftware.smackx.omemo.trust.OmemoFingerprint;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.jxmpp.jid.BareJid;
 
 public class Main extends Application implements LoginCallback {
+
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     private Stage stage;
 
@@ -104,12 +109,13 @@ public class Main extends Application implements LoginCallback {
             Map<OmemoDevice, OmemoFingerprint> fingerprints = Util.getFingerprints(connection);
 
             ObservableList<OmemoIdentity> identities = repository.getIdentities();
+            LOGGER.info("Received " + identities.size() + " OMEMO identities");
             for (OmemoDevice device : fingerprints.keySet()) {
                 identities.addAll(new OmemoIdentity(device, fingerprints.get(device)));
-                System.out.println(Util.twoLinesFingerprint(fingerprints.get(device)));
+                LOGGER.info(Util.twoLinesFingerprint(fingerprints.get(device)));
             }
 
-            connection.disconnect(new Presence(Presence.Type.unavailable));
+            connection.disconnect();
 
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/fxml/qrdisplay.fxml"));
@@ -119,8 +125,8 @@ public class Main extends Application implements LoginCallback {
             stage.setTitle("OMEMO QR-Code Generator");
             stage.setScene(scene);
             stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException | XMPPException | SmackException | IOException | CorruptedOmemoKeyException e) {
+            LOGGER.log(Level.SEVERE, "Exception in login", e);
         }
     }
 }

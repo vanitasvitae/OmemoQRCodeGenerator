@@ -20,7 +20,6 @@ import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubException;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 
-import org.bouncycastle.util.Strings;
 import org.jxmpp.jid.BareJid;
 
 public class Util {
