@@ -1,6 +1,8 @@
 package de.vanitasvitae.omemoqrgenerator;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.packet.Presence;
@@ -18,6 +20,8 @@ import javafx.stage.Stage;
 import org.jxmpp.jid.BareJid;
 
 public class Main extends Application implements LoginCallback {
+
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     private Stage stage;
 
@@ -104,9 +108,10 @@ public class Main extends Application implements LoginCallback {
             Map<OmemoDevice, OmemoFingerprint> fingerprints = Util.getFingerprints(connection);
 
             ObservableList<OmemoIdentity> identities = repository.getIdentities();
+            LOGGER.info("Received " + identities.size() + " OMEMO identities");
             for (OmemoDevice device : fingerprints.keySet()) {
                 identities.addAll(new OmemoIdentity(device, fingerprints.get(device)));
-                System.out.println(Util.twoLinesFingerprint(fingerprints.get(device)));
+                LOGGER.info(Util.twoLinesFingerprint(fingerprints.get(device)));
             }
 
             connection.disconnect(new Presence(Presence.Type.unavailable));
@@ -121,6 +126,7 @@ public class Main extends Application implements LoginCallback {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Exception in login", e);
         }
     }
 }
